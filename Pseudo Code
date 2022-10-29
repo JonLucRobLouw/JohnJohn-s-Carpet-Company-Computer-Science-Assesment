@@ -1,0 +1,674 @@
+#Jonathan Luc Robertson Louw Carpet company assesment
+
+
+
+#Imports all the required modules 
+
+
+
+IMPORT csv
+
+IMPORT os
+
+from typing IMPORT Type, final
+
+IMPORT decimal
+
+from asyncio IMPORT FastChildWatcher
+
+from contextlib IMPORT nullcontext
+
+from platform IMPORT node
+
+from unicodedata IMPORT digit
+
+
+
+#This DEFINE CLASS makes an object FOR the list of discounts and each object is built from a row IN the csv file
+
+#Code refers to the discount code, deduction refers to either the percentage reduced, or the cash deducted based on the type of variable
+
+DEFINE CLASS discountVoucher:
+
+
+
+  DEFINE FUNCTION __init__(self, Code, Deduction, Type):
+
+
+
+    SET self.Code TO Code
+
+    SET self.Deduction TO Deduction
+
+    SET self.Type TO Type
+
+
+
+#Of course, no price is £7.5, it's £7.50 so this function works to ensure that the number is IN the right format as a price
+
+DEFINE FUNCTION makePriceNum(number):
+
+
+
+    SET numStr TO str(number)
+
+    
+
+    IF '.' IN numStr:
+
+       
+
+       SET fracStrLi TO str(number).split('.')
+
+    
+
+       SET first TO fracStrLi[0]
+
+       SET last TO fracStrLi[1]
+
+    
+
+    
+
+       SET digits TO len(last)
+
+          
+
+       IF digits < 2:
+
+       
+
+           OUTPUT('confirmed')
+
+       
+
+           SET last TO last.replace('0', '')
+
+           SET last TO last + '0' 
+
+    
+
+           SET numStr TO first + '.' + last
+
+
+
+    RETURN numStr
+
+
+
+#Instead of repeating what is essentially the same core code with every numerical INPUT that involves checking IF the data entered is correct and allowing the user to re-inter that data, I have elected to use a function
+
+#This function accepts a parameter of string type, the question actually being asked, other than that everything else is standardised and the final value is simply RETURNed and can then be assigned to any variable that requires said data
+
+#It RETURNs type Boolean. If the user enters yes, it RETURNs True, no is False
+
+DEFINE FUNCTION verifyBool(question):
+
+
+
+    SET go TO True
+
+    SET RETURNData TO False
+
+
+
+    WHILE go:
+
+
+
+        SET data TO INPUT(question)
+
+                
+
+        SET data TO data.lower().strip()
+
+
+
+        IF data EQUALS 'yes' or data EQUALS 'no' or data EQUALS 'y' or data EQUALS 'n':
+
+
+
+            IF data EQUALS 'yes' or data EQUALS 'y':
+
+
+
+                SET RETURNData TO True
+
+
+
+                SET go TO False
+
+            
+
+            ELSEIF data EQUALS 'no' or data EQUALS 'no':
+
+
+
+                SET RETURNData TO False
+
+
+
+                SET go TO False
+
+
+
+        ELSE: 
+
+
+
+            OUTPUT('''Ooops didn't quite catch that, please re-inter these values''')
+
+        
+
+    RETURN RETURNData
+
+
+
+#It RETURNs type float. It will make sure the string is casted to a float and make sure the number is definitely numerical before it is casted to prevent crashes
+
+#It will also allow users to re-enter the price IF they want or IF the INPUT is incorrect
+
+DEFINE FUNCTION verifyInt(question):
+
+
+
+    #In order to prevent crashes resulting from trying to cast a non-numerical value to a string, the value is only casted to a string type once it has already been confirmed as numerical which is done through the isnumeric inbuilt python function
+
+    
+
+    SET go TO True
+
+    SET RETURNData TO 0
+
+
+
+    WHILE go:
+
+
+
+        SET data TO INPUT(question)
+
+
+
+        IF data.isnumeric():
+
+
+
+            #Float instead of int used to allow FOR decimal values 
+
+
+
+            SET RETURNData TO float(data)
+
+
+
+            SET confirmed TO verifyBool('Are you happy with your choice? Type yes to continue, no to re-enter ')
+
+
+
+            IF confirmed EQUALS True:
+
+
+
+                SET go TO False
+
+
+
+        
+
+        ELSE: 
+
+
+
+            OUTPUT('''Ooops didn't quite catch that, please re-inter these values''')
+
+        
+
+    RETURN RETURNData
+
+
+
+#Accpets 5 parameters. Question is of type string so is inp1 and inp2 but d1 and d2 could be anything. In this code they are only ever strings or Booleans
+
+#inp1 corresponds to d1 and inp2 corresponds with d2. Say we want the user to enter a FOR inches, b FOR metres
+
+#inp1 is d1, so IF inp1 is a and d1 is inches, IF the user enters a as the INPUT, we know the data to output is inches
+
+DEFINE FUNCTION verifyMultipleChoice(question, inp1, inp2, d1, d2):
+
+
+
+    SET go TO True
+
+    SET RETURNData TO ''
+
+
+
+    WHILE go:
+
+
+
+        SET data TO INPUT(question)
+
+
+
+        SET data TO data.lower().strip()
+
+
+
+        IF data EQUALS inp1:
+
+
+
+            SET RETURNData TO d1
+
+
+
+            SET go TO False
+
+        
+
+        ELSEIF data EQUALS inp2:
+
+
+
+            SET RETURNData TO d2
+
+
+
+            SET go TO False
+
+        
+
+        ELSE:
+
+
+
+            OUTPUT('''Ooops didn't quite catch that, please re-inter these value''')
+
+        
+
+        
+
+    RETURN RETURNData
+
+
+
+OUTPUT('''Hello, my name is Jonathan with JonJon's  carpet company, what can I do FOR you?''')
+
+SET name TO INPUT('What is your name? ')
+
+
+
+OUTPUT('Hello', name), 'lets get started!'
+
+
+
+#Here we see the verifyMultipleChoice function being used with d1(a), d2(b) inp1(inches), inp2(metres)
+
+SET measurement TO verifyMultipleChoice('Do you want to use inches or metres? Select a FOR inches and b FOR metres ', 'a', 'b', 'inches', 'metres')
+
+
+
+OUTPUT('You have selected', measurement)
+
+
+
+#Here we see the verifyInt function being used with the question asking about the width and the width of type float being RETURNed and assigned to variable width
+
+SET width TO verifyInt('What is the width of your floor IN m? ')
+
+SET height TO verifyInt('What is the height of your floor IN m? ')
+
+
+
+#The area is calculated by multiplying floats of width and height
+
+SET area TO width * height
+
+
+
+#We see the verifyBool function being used with the Boolean RETURN being assigned to addDeductions
+
+SET addDeductions TO verifyBool('Do you have any areas that you do not want to be carpeted, like a piece of furniture? Type yes or no ')
+
+
+
+#If the user says yes to having non-carpeted areas addDeductions becomes true and as such the loop begins
+
+WHILE addDeductions EQUALS True:
+
+
+
+    #Width and height of area to subtract is calculated here 
+
+    SET width2 TO verifyInt('What is the width of the area you want deducted? ')
+
+    SET height2 TO verifyInt('What is the height of the area you want deducted? ')
+
+
+
+    SET deduction TO width2 * height2 
+
+
+
+    #The deduction couldn't possibly be bigger than the function itself and IF they were same the area would be 0
+
+    IF deduction >= area:
+
+        
+
+        OUTPUT('Your deduction is bigger than the total area of your carpet. Please add another entry or exit')
+
+
+
+        #The standard verifyMultipleChoice or verifyBool function couldn't be used as there is more than one option esc, yes, no
+
+        #Thererfore the data below is essentially a copy of the verifyMultipleChoice code but with more hen one clause 
+
+        SET go TO True
+
+
+
+        WHILE go:
+
+    
+
+            SET data TO INPUT('Type yes to re-enter your deduction, no to continue with no deductions and esc to completely exit ')
+
+    
+
+            SET data TO data.lower().strip()
+
+    
+
+            IF data EQUALS 'yes':
+
+                
+
+                SET go TO False
+
+            
+
+            ELSEIF data EQUALS 'no':    
+
+    
+
+                SET go TO False
+
+                SET addDeductions TO False
+
+
+
+            ELSEIF data EQUALS 'esc':
+
+
+
+                OUTPUT('Ending programme')
+
+
+
+                os._exit(0)
+
+
+
+            ELSE:
+
+    
+
+                OUTPUT('''Ooops didn't quite catch that, please re-inter these value''')    
+
+    ELSE:
+
+
+
+        #Informs the user of the deduction amount and ensures it is casted to a string as floats cannot be OUTPUTed
+
+        OUTPUT('''That's a total deduction of''', str(deduction))
+
+
+
+        #Returns Bool. If the user enters no, addDeductions will become false and as such the loop will come to a close
+
+        SET addDeductions TO verifyBool('Would you like to add more entries? If you do type yes, to exit type no ')
+
+
+
+#Inform the user of the area IN square metres
+
+OUTPUT('''Ok that's an area of', area, 'square metres''') 
+
+
+
+#Similar to earlier, due to the presence of multiple clauses the verifyMultipleChoice function is un-useable
+
+SET carpetType TO INPUT('What quality of carpet you want? Select 1 FOR low quality, 2 FOR medium quality and 3 FOR high quality ')
+
+
+
+SET finalPrice TO 0
+
+
+
+#Multiplies the area with the price depending on the carpet quality
+
+IF carpetType EQUALS '1':
+
+    SET finalPrice TO area * 3.50
+
+ELSEIF carpetType EQUALS '2':
+
+    SET finalPrice TO area * 5.50
+
+ELSEIF carpetType EQUALS '3':
+
+    SET finalPrice TO area * 7.50
+
+
+
+#Discount
+
+
+
+#Divides total by 10 to get 10 percent and then subtracts that from the total price
+
+SET deduction TO finalPrice / 10
+
+
+
+finalPrice -= deduction
+
+
+
+OUTPUT('''It’s your lucky day. Since your new to JonJon's carpet company, we are giving you a discount of 10 percent!''')
+
+
+
+SET deductionStr TO makePriceNum(deduction)
+
+
+
+OUTPUT('You save', deductionStr, ' pounds')
+
+
+
+SET isDiscountCode TO verifyBool('Do you have an additional discount code? ')
+
+
+
+#Discount Codes and gift card data is stored on a separate csv file, a database of sorts
+
+
+
+IF isDiscountCode EQUALS True:
+
+
+
+    #This list will be populated by all the available gift codes IN the FOR loop below. Each gift card consists of an object
+
+
+
+    SET discountCodes TO []
+
+    
+
+    SET code TO INPUT('Enter your discount code: ')
+
+
+
+    #Opens the csv
+
+    with open('discountCodes.csv', newline='') as csvfile:
+
+
+
+        #Fetches the data IN the csv file
+
+
+
+        SET reader TO csv.DictReader(csvfile)
+
+
+
+        #Loops over every row, each row being a gift card consisting of the entries Code, Deduction and Type
+
+        #I would advise you refer to the discountCodes.csv file located IN this directory FOR everything to make more sense 
+
+
+
+        FOR row IN reader:
+
+
+
+            #Appens that csv file as an object to the discountCodes array
+
+
+
+         discountCodes.append(discountVoucher(row['Code'], row['Deduction'], row['Type']))
+
+
+
+        #Before we have looked over the list, we do not know IF the user has found a gift card so by default this variable has been assinged as False 
+
+    
+
+        SET discountCodeFound TO False
+
+        SET deduction TO 0
+
+        SET deductionFinal TO 0.0 
+
+
+
+        #Loops through the list to find any matches
+
+        #In retrospect I could have simply found matches within IN FOR row IN reader loop. However, I opted FOR this soltuion to demonstrate how an object can be effectively used within an array
+
+        #I also recognise the deductionFinal variable as necessary as the variable is already a float, so removing this could be an amendment that could possibly improve the efficiency of this code
+
+        #I could imrpove my code by allowing FOR multiple gift cards
+
+
+
+        FOR i IN discountCodes:
+
+
+
+            IF i.Code EQUALS code:
+
+
+
+                #If one of the discount codes IN the list is equal to the discount code the user entered, we know that the discount code the user entered definitely equates too one of the discount codes IN the list
+
+                
+
+                #We assign discountCodeFound as true
+
+
+
+                SET discountCodeFound TO True
+
+                
+
+                #One of the attributes of each discount code object is 'Type'
+
+                #Type cash refers to just a linear deduction of amount so IF the deduction variable is 20 no matter the total amount 20 pounds is deducted
+
+
+
+                IF i.Type EQUALS 'Cash':
+
+
+
+                    SET deduction TO float(i.Deduction)
+
+
+
+                    finalPrice -= deduction
+
+
+
+                #If on the other hand the type is Percentage, we deduct a percentage of the total amount 
+
+                #So IF the deduction amount is 20 we find 20 percent of the total and then deduct said amount from the total 
+
+
+
+                ELSE:
+
+
+
+                    #Get 1 percent
+
+                    SET cutter TO finalPrice / 100
+
+
+
+                    #Mutliply that one percent by the total percentage to be deducted
+
+                    SET deduction TO float(cutter) * float(i.Deduction)
+
+
+
+                    SET deductionFinal TO float(deduction)
+
+
+
+                    #Subtract that amount from the total
+
+                    finalPrice -= deductionFinal
+
+        
+
+        #If we know they have a discount Code we tell them the amount they save 
+
+
+
+        IF discountCodeFound EQUALS True:
+
+
+
+            #Make sure the number is structured IN the way a decimal of a price should be (£7.50 not £7.5)
+
+            SET deductionStr TO makePriceNum(deductionFinal)
+
+
+
+            OUTPUT('Your discount code has been applied')
+
+            OUTPUT('You have saved', deductionStr)
+
+
+
+SET adress TO INPUT('Where should we ship your carpet to? ')
+
+SET phoneNumber TO INPUT('What is your phone number so we can keep IN contact? ')
+
+
+
+SET finalPriceStr TO makePriceNum(finalPrice)
+
+
+
+OUTPUT('Thanks FOR shopping with the JonJon carpeting company. Your final bill is' , finalPriceStr, 'pounds your carpet will be shipped to', adress)
+
